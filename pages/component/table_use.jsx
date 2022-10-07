@@ -24,7 +24,7 @@ export default function EX() {
     { dataField: "car_regis", text: "ทะเบียนรถ" },
     { dataField: "", text: "บัตร ปชช." },
     { dataField: "Employee_ID", text: "รหัสพนักงาน" },
-    { dataField: "Name", text: "ชื่อ-นามสกุล" },
+    { dataField: "Name", text: "ชื่อ-นามสกุล", },
     { dataField: "Agency", text: "หน่วยงาน" },
     { dataField: "Zone", text: "ZONE" },
     { dataField: "type_vehicle", text: "ประเภทรถ" },
@@ -67,7 +67,7 @@ export default function EX() {
             columns={columns}
             noDataIndication="There is no data"
             pagination={paginationFactory()}
-            headerClasses="bg-dark text-white"
+            headerClasses="bg-dark text-white text-center "
           />
         </div>
       )}

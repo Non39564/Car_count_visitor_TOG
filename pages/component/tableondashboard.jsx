@@ -24,11 +24,9 @@ export default function tbDashboard() {
         { 
             dataField: "Date", 
             text: "Date",
-            headerClasses: "row",
             filter: dateFilter({
-              className: 'd-flex justify-content-between text-dark col-12',
+              className: 'd-flex justify-content-evenly text-dark col-8 px-0',
               withoutEmptyComparatorOption: true,
-              comparatorClassName: '',
             })
         },
       { dataField: "Allcar", text: "Full_CAR" },

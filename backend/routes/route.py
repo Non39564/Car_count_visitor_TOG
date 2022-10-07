@@ -16,6 +16,11 @@ async def data_user():
     data = get_data_user()
     return data
 
+@route.get('/visitor_user')
+async def visitor_user_detail():
+    detail = visitor_user()
+    return detail
+
 @route.get('/User/{uid}')
 async def User(uid: str):
     now = datetime.now()
@@ -23,6 +28,14 @@ async def User(uid: str):
     user = User_data(uid)
     user.append(insert_time)
     return user
+
+@route.get('/Visitor/{detail}')
+async def User(detail: str):
+    now = datetime.now()
+    insert_time = now.strftime("%Y-%m-%d %H:%M:%S")
+    visitor = Visitor_data(detail)
+    visitor.append(insert_time)
+    return visitor
 
 @route.get('/chart_data_dashboard')
 async def Column():

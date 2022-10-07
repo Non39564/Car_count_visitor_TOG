@@ -1,17 +1,20 @@
-import pymysql, os
+import pymysql
+import os
 from datetime import datetime
 import pyqrcode
 import shutil
 
-def getConnection ():
+
+def getConnection():
     return pymysql.connect(
-        host = 'localhost',
-        db = 'car_regis',
-        user = 'root',
-        password = '',
-        charset = 'utf8',
-        cursorclass = pymysql.cursors.DictCursor
-		)
+        host='localhost',
+        db='car_regis',
+        user='root',
+        password='',
+        charset='utf8',
+        cursorclass=pymysql.cursors.DictCursor
+    )
+
 
 def get_data_user():
     connection = getConnection()
@@ -34,12 +37,15 @@ def get_data_user():
     data = cursor.fetchall()
     return data
 
-def insert_data(uid,date):
+
+def insert_data(uid, date):
     connection = getConnection()
-    sql = "INSERT INTO vechine_today(Date, Employee_ID) VALUES ('%s','%s')" % (date,uid)
+    sql = "INSERT INTO vechine_today(Date, Employee_ID) VALUES ('%s','%s')" % (
+        date, uid)
     cursor = connection.cursor()
     cursor.execute(sql)
     connection.commit()
+
 
 def User_data(user):
     connection = getConnection()
@@ -64,7 +70,41 @@ def User_data(user):
     now = datetime.now()
     insert_time = now.strftime("%Y-%m-%d")
     if len(data) > 0:
-        insert_data(user,insert_time)
+        insert_data(user, insert_time)
+    return data
+
+def visitor_user():
+    connection = getConnection()
+    sql = f"""
+        SELECT * FROM visitor_detail
+        ORDER BY ID DESC"""
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    return data
+
+def insert_visitor(id, date):
+    connection = getConnection()
+    sql = f"INSERT INTO visitor(Visitor, Date) VALUES ('{id}','{date}')"
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    connection.commit()
+
+def Visitor_data(detail):
+    connection = getConnection()
+    sql = f"""
+        SELECT * FROM visitor_detail WHERE why = '{detail}' 
+        ORDER BY ID DESC
+        Limit 1
+        """
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    id = data[0]["ID"]
+    now = datetime.now()
+    insert_time = now.strftime("%Y-%m-%d")
+    if len(data) > 0:
+        insert_visitor(id, insert_time)
     return data
 
 def columnDashboard():
@@ -76,6 +116,7 @@ def columnDashboard():
     column = [item["Date"].strftime("%Y-%m-%d") for item in data]
     return column
 
+
 def dataactualrowDahboard():
     connection = getConnection()
     sql = """SELECT COUNT(*) as Data FROM vechine_today GROUP BY Date"""
@@ -84,6 +125,7 @@ def dataactualrowDahboard():
     data = cursor.fetchall()
     row = [item["Data"] for item in data]
     return row
+
 
 def dataallrowDahboard():
     connection = getConnection()
@@ -94,13 +136,15 @@ def dataallrowDahboard():
     row = [item["Data"] for item in data]
     return row
 
+
 def gen_qrcode(data):
     print(data)
     for d in range(len(data)):
         url = "https://a41e-184-82-103-244.ap.ngrok.io"
         Employee_ID = data['รหัสพนักงาน'][d]
         connection = getConnection()
-        sql = "INSERT INTO receive_qrcode(Employee_ID) VALUES ('%s')" % (Employee_ID)
+        sql = "INSERT INTO receive_qrcode(Employee_ID) VALUES ('%s')" % (
+            Employee_ID)
         cursor = connection.cursor()
         cursor.execute(sql)
         connection.commit()
@@ -108,8 +152,9 @@ def gen_qrcode(data):
         filename = "./qrcode/"+str(Employee_ID)+".png"
         print(filename)
         qr.png(filename, scale=6)
-    shutil.make_archive('qrcode','zip','qrcode')
-    
+    shutil.make_archive('qrcode', 'zip', 'qrcode')
+
+
 def table_Dashboard():
     connection = getConnection()
     all = """SELECT Date,
@@ -140,8 +185,9 @@ def table_Dashboard():
     cursor = connection.cursor()
     cursor.execute(all)
     all = cursor.fetchall()
-    
+
     return all
+
 
 def get_company(input):
     data = ''
@@ -155,6 +201,7 @@ def get_company(input):
             data = c['ID']
     return data
 
+
 def get_agency(input):
     data = ''
     connection = getConnection()
@@ -167,6 +214,7 @@ def get_agency(input):
             data = a['ID']
     return data
 
+
 def get_company_dormitory(input):
     data = ''
     connection = getConnection()
@@ -175,12 +223,13 @@ def get_company_dormitory(input):
     cursor.execute(sql)
     company_dormitory = cursor.fetchall()
     if str(input) == 'nan':
-        data = "ไม่ใช่" 
-    else: 
+        data = "ไม่ใช่"
+    else:
         for cd in company_dormitory:
             if input == cd['Detail']:
                 data = cd['ID']
     return data
+
 
 def get_zone(input):
     data = ''
@@ -196,6 +245,7 @@ def get_zone(input):
             data = z['ID']
     return data
 
+
 def get_type_vehicle(input):
     data = ''
     connection = getConnection()
@@ -208,7 +258,8 @@ def get_type_vehicle(input):
             data = tv['ID']
     return data
 
-def upload_user(data,data_user):
+
+def upload_user(data, data_user):
     for d in range(len(data)):
         Employee_ID = str(data['รหัสพนักงาน'][d])
         Name = data['ชื่อ-สกุล'][d]
@@ -218,7 +269,8 @@ def upload_user(data,data_user):
             Phone = "0"+str(int(float(data['เบอร์โทร'][d])))
         Agency = get_agency(data['หน่วยงาน'][d])
         Company = get_company(data['Company'][d])
-        Company_dormitory = get_company_dormitory(str(data['อยู่หอพัก บริษัท'][d]))
+        Company_dormitory = get_company_dormitory(
+            str(data['อยู่หอพัก บริษัท'][d]))
         connection = getConnection()
         sql = f"""INSERT INTO user(Employee_ID, Name, Phone, Agency, Company, Company_dormitory) VALUES 
         ('{Employee_ID}','{Name}','{Phone}','{Agency}','{Company}','{Company_dormitory}')"""
@@ -237,22 +289,25 @@ def upload_data_user(data_user):
         Car_Regitation = data_user['ทะเบียนรถ'][du]
         Zone = get_zone(data_user['ZONE'][du])
         connection = getConnection()
-        sql = "INSERT INTO data_user(Employee_ID, Type_Vehicle, Car_Regitation, Zone) VALUES ('%s','%s','%s','%s')" % (Employee_ID,Type_Vehicle,Car_Regitation,Zone)
+        sql = "INSERT INTO data_user(Employee_ID, Type_Vehicle, Car_Regitation, Zone) VALUES ('%s','%s','%s','%s')" % (
+            Employee_ID, Type_Vehicle, Car_Regitation, Zone)
         cursor = connection.cursor()
         cursor.execute(sql)
         connection.commit()
-        
+
+
 def insertdataonly(Employee_ID, Name, Phone, Agency, Company, Company_dormitory, Type_Vehicle, Car_Regitation, Zone):
     connection = getConnection()
     sql1 = f"""INSERT INTO data_user(Employee_ID, Type_Vehicle, Car_Regitation, Zone) VALUES 
-    ('{Employee_ID}','{Type_Vehicle}','{Car_Regitation}','{Zone}')""" 
+    ('{Employee_ID}','{Type_Vehicle}','{Car_Regitation}','{Zone}')"""
     sql2 = f"""INSERT INTO user(Employee_ID, Name, Phone, Agency, Company, Company_dormitory) VALUES 
         ('{Employee_ID}','{Name}','{Phone}','{Agency}','{Company}','{Company_dormitory}')"""
     cursor = connection.cursor()
     cursor.execute(sql2)
     cursor.execute(sql1)
     connection.commit()
-    
+
+
 def gen_qrcode_only(data):
     url = "https://a41e-184-82-103-244.ap.ngrok.io"
     connection = getConnection()
@@ -263,7 +318,8 @@ def gen_qrcode_only(data):
     qr = pyqrcode.create(url+"/User/"+str(data))
     filename = "./qrcodeonce/"+str(data)+".png"
     qr.png(filename, scale=6)
-    
+
+
 def find_edit(user):
     connection = getConnection()
     sql = f"""
@@ -285,6 +341,7 @@ def find_edit(user):
     data = cursor.fetchall()
     return data
 
+
 def update_user(Employee_ID, Name, Phone, Agency, Company_dormitory, Type_Vehicle, Car_Regitation, Zone):
     connection = getConnection()
 
@@ -303,7 +360,8 @@ def update_user(Employee_ID, Name, Phone, Agency, Company_dormitory, Type_Vehicl
     cursor.execute(sql1)
     cursor.execute(sql2)
     connection.commit()
-    
+
+
 def visitor_gen(Detail):
     connection = getConnection()
     sql1 = f"""INSERT INTO visitor_detail(Why) VALUES ('{Detail}')"""
@@ -311,10 +369,11 @@ def visitor_gen(Detail):
     cursor.execute(sql1)
     connection.commit()
     url = "https://a41e-184-82-103-244.ap.ngrok.io"
-    qr = pyqrcode.create(url+"/User/"+str(Detail))
+    qr = pyqrcode.create(url+"/Visitor/"+str(Detail))
     filename = "./qrcodeonce/"+str(Detail)+".png"
     qr.png(filename, scale=6)
-    
+
+
 def columnDashboardVisitor():
     connection = getConnection()
     sql = """SELECT vechine_today.Date as Date FROM vechine_today
@@ -325,6 +384,7 @@ def columnDashboardVisitor():
     data = cursor.fetchall()
     column = [item["Date"].strftime("%Y-%m-%d") for item in data]
     return column
+
 
 def dataactualrowDahboardVisitor():
     connection = getConnection()
@@ -337,6 +397,7 @@ def dataactualrowDahboardVisitor():
     row = [item["Data"] for item in data]
     return row
 
+
 def datavisitorrowDahboardVisitor():
     connection = getConnection()
     sql = """SELECT COUNT(*) as Data FROM Visitor
@@ -346,6 +407,7 @@ def datavisitorrowDahboardVisitor():
     data = cursor.fetchall()
     row = [item["Data"] for item in data]
     return row
+
 
 def tablevisitor():
     connection = getConnection()
@@ -366,5 +428,4 @@ def tablevisitor():
     cursor = connection.cursor()
     cursor.execute(all)
     all = cursor.fetchall()
-    
     return all
