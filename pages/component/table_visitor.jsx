@@ -1,13 +1,8 @@
-import paginationFactory from "react-bootstrap-table2-paginator";
-import BootstrapTable from "react-bootstrap-table-next";
-import filterFactory, { dateFilter } from 'react-bootstrap-table2-filter';
-import ToolkitProvider, { Search, CSVExport } from "react-bootstrap-table2-toolkit";
 import { useState } from 'react';
 import axios from "axios";
-import Col from 'react-bootstrap/Col';
-import Row from 'react-bootstrap/Row';
 import { useEffect } from 'react';
-import { MDBBtn } from 'mdb-react-ui-kit';
+import DataTable from 'react-data-table-component';
+import DataTableExtensions from "react-data-table-component-extensions";
 
 export default function tbVisitor() {
 
@@ -19,52 +14,33 @@ export default function tbVisitor() {
           .catch(error => console.log(error))
        }, [])
 
-    const { SearchBar } = Search;
-    const { ExportCSVButton } = CSVExport;
     const columns = [
-        { dataField: "Date", text: "Date", 
-        headerClasses:"bg-dark col-2",
-        filter: dateFilter({
-            className: 'd-flex justify-content-evenly text-dark  px-0',
-            withoutEmptyComparatorOption: true,
-          })  },
-        { dataField: "OnPass", text: "On Passed",
-        headerClasses:"bg-dark col-2 ",
-      },
-        { dataField: "Visitor", text: "Visitor",
-        headerClasses:"bg-dark col-2",
-      },
-    ];
+        { name: 'Date', selector: "Date" },
+        { name: 'OnPass', selector: "OnPass" },
+        { name: 'Visitor', selector: "Visitor" },
+      ];
 
     const data = datas || [];
 
     return (
-        <ToolkitProvider
-            keyField="Date"
-            data={data}
-            columns={columns}
-            CSVExport
+        <div className="main">
+        <DataTableExtensions
+          columns={columns}
+          data={data}
+          print={false}
+          export={true}
+          exportHeaders={true}
         >
-            {(props) => (
-                <div>
-                    <hr />
-                    <div className="d-flex justify-content-between">
-                        <ExportCSVButton className='bg-success text-white' {...props.csvProps}>Export CSV!!</ExportCSVButton>
-                        <MDBBtn color='info' href="/addVisitor">Add</MDBBtn>
-                    </div>
-                    <hr />
-                    <BootstrapTable
-                        {...props.baseProps}
-                        keyField="date"
-                        data={data}
-                        columns={columns}
-                        noDataIndication="There is no solution"
-                        pagination={paginationFactory()}
-                        headerClasses="bg-dark text-white"
-                        filter={ filterFactory()}
-                    />
-                </div>
-      )}
-    </ToolkitProvider>
+          <DataTable
+            // columns={columns}
+            // data={data}
+            noHeader
+            // defaultSortField="id"
+            // defaultSortAsc={false}
+            pagination
+            highlightOnHover
+          />
+        </DataTableExtensions>
+      </div>
     );
 }

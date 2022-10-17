@@ -1,7 +1,6 @@
 import Barchart from './component/chart'
 import Table_Dashboard from './component/tableondashboard'
 import Head from 'next/head'
-import axios from 'axios'
 
 export default function Home() {
   return (

@@ -1,68 +1,48 @@
-import paginationFactory from "react-bootstrap-table2-paginator";
-import filterFactory, { dateFilter } from 'react-bootstrap-table2-filter';
-import BootstrapTable from "react-bootstrap-table-next";
-import ToolkitProvider, { Search, CSVExport } from "react-bootstrap-table2-toolkit";
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from "axios";
-import Col from 'react-bootstrap/Col';
-import Row from 'react-bootstrap/Row';
+import DataTable from 'react-data-table-component';
+import DataTableExtensions from "react-data-table-component-extensions";
 
 export default function tbDashboard() {
 
-    const [fullMoto, setFullMoto] = useState();
+  const [fullMoto, setFullMoto] = useState();
 
-    useEffect(() => { 
-      axios.get('http://localhost:8000/table_data_dashboard')
-            .then(async (response) => {
-              setFullMoto(response.data)
-            }).catch(error => console.log(error))
-     }, [])
-            
-    const { SearchBar } = Search;
-    const { ExportCSVButton } = CSVExport;
-    const columns = [
-        { 
-            dataField: "Date", 
-            text: "Date",
-            filter: dateFilter({
-              className: 'd-flex justify-content-evenly text-dark col-8 px-0',
-              withoutEmptyComparatorOption: true,
-            })
-        },
-      { dataField: "Allcar", text: "Full_CAR" },
-      { dataField: "actualcar", text: "Actual_CAR" },
-      { dataField: "AllMoto", text: "Full_MOTO" },
-      { dataField: "actualMoto", text: "Actual_MOTO" },
-      
-    ];
+  useEffect(() => {
+    axios.get('http://localhost:8000/table_data_dashboard')
+      .then(async (response) => {
+        setFullMoto(response.data)
+      }).catch(error => console.log(error))
+  }, [])
 
-    const data = fullMoto || []
-  
-    return (
-      <ToolkitProvider
-        keyField="Date"
-        data={data}
-        columns={columns}
-        CSVExport
-      >
-        {(props) => (
-          <div>
-            <hr />
-            <ExportCSVButton className='bg-success text-white' {...props.csvProps}>Export CSV!!</ExportCSVButton>
-            <hr />
-            <BootstrapTable
-              {...props.baseProps}
-              data={data}
-              columns={columns}
-              noDataIndication="There is no data"
-              pagination={paginationFactory()}
-              headerClasses="bg-dark text-white"
-              filter={ filterFactory()}
-            >
-            
-            </BootstrapTable>
-          </div>
-        )}
-      </ToolkitProvider>
-    );
-  }
+  const columns = [
+    { name: 'Date', selector: "Date" },
+    { name: 'Full_CAR', selector: "Allcar" },
+    { name: 'Actual_CAR', selector: "actualcar" },
+    { name: 'Full_MOTO', selector: "AllMoto" },
+    { name: 'Actual_MOTO', selector: "actualMoto" }
+  ];
+
+  const data = fullMoto || []
+
+  return (
+    <div className="main">
+        <DataTableExtensions
+          columns={columns}
+          data={data}
+          print={false}
+          export={true}
+          exportHeaders={true}
+        >
+          <DataTable
+            // columns={columns}
+            // data={data}
+            noHeader
+            // defaultSortField="id"
+            // defaultSortAsc={false}
+            pagination
+            highlightOnHover
+          />
+        </DataTableExtensions>
+      </div>
+  );
+}

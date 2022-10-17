@@ -1,5 +1,5 @@
 from fastapi import APIRouter, File, UploadFile
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse
 from database.db import *
 from datetime import datetime
 import shutil
@@ -70,14 +70,15 @@ async def create_upload_file(file: UploadFile = File(...)):
 
 @route.post("/upload_data_user/")
 async def upload_data_user(file: UploadFile = File(...)):
-    with open(file.filename, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    user = pd.read_excel(file.filename,sheet_name='user')
-    data_user = pd.read_excel(file.filename,sheet_name='data_user')
-    upload_user(user,data_user)
-    cwd = os.getcwd()
-    shutil.rmtree(cwd+f"\{file.filename}")  #
-    return {'status': 'success'}
+    try:
+        with open(file.filename, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        user = pd.read_excel(file.filename,sheet_name='user')
+        data_user = pd.read_excel(file.filename,sheet_name='data_user')
+        upload_user(user,data_user)
+        return {'status': 'success'}
+    except:
+        return {'status': 'Error'}
 
 @route.get("/export_excel")
 async def export_excel():
@@ -96,7 +97,7 @@ class User(BaseModel):
     Password: str
 
 @route.post("/api/login")
-async def test_login(user: User):
+def test_login(user: User):
     data = user.dict()
     print(data)
     if data['Username'] == "admin" and data['Password'] == "admin":
@@ -109,7 +110,7 @@ async def test_login(user: User):
                 "id": 1,
                 "fname": "admin",
                 "lname": "admin",
-                "username": "admin@admin.com",
+                "username": "admin",
                 "password": "admin",
                 "email": "admin@admin.com",
                 }
@@ -131,6 +132,7 @@ class Oncedata(BaseModel):
     CarRegis: str
     Type_vehicle: str
     Zone: str
+    Status_type: str
 
 @route.post("/insertOnce")
 async def insertOnce(data: Oncedata):
@@ -144,7 +146,9 @@ async def insertOnce(data: Oncedata):
     Type_Vehicle = data["Type_vehicle"]
     Car_Regitation = data["CarRegis"]
     Zone = data["Zone"]
-    insertdataonly(Employee_ID, Name, Phone, Agency, Company, Company_dormitory, Type_Vehicle, Car_Regitation, Zone)
+    Status_type = data['Status_type']
+    print(Zone)
+    # insertdataonly(Employee_ID, Name, Phone, Agency, Company, Company_dormitory, Type_Vehicle, Car_Regitation, Zone, Status_type)
     return {"data" : "Success"}
 
 class Oncedata_gen(BaseModel):
@@ -181,11 +185,13 @@ async def insertOnce_gen(data: Oncedata):
     Name = data["Name"]
     Phone = data["Phone"]
     Agency = data["Agency"]
+    Company = data["Company"]
     Company_dormitory = data["Company_dormitory"]
     Type_Vehicle = data["Type_vehicle"]
     Car_Regitation = data["CarRegis"]
     Zone = data["Zone"]
-    update_user(Employee_ID, Name, Phone, Agency, Company_dormitory, Type_Vehicle, Car_Regitation, Zone)
+    Status_type = data['Status_type']
+    update_user(Employee_ID, Name, Phone, Agency, Company_dormitory, Company, Type_Vehicle, Car_Regitation, Zone, Status_type)
     return {"data" : "Success"}
     
 @route.get('/chart_data_dashboard_visitor')
@@ -200,11 +206,19 @@ async def ColumnVisitor():
     data = tablevisitor()
     return data
 
+class visitor_Once(BaseModel):
+    Name: str
+    Detail: str
+    car_regis: str
+
 @route.post("/insertOnce_gen_visitor")
-async def insertOnce_gen_visitor(data: Oncedata_gen):
+async def insertOnce_gen_visitor(data: visitor_Once):
     data = data.dict()
-    Employee_ID = data["Employee_ID"]
-    visitor_gen(Employee_ID)
+    Name = data["Name"]
+    Detail = data["Detail"]
+    car_regis = data["car_regis"]
+    print(Detail, Name, car_regis)
+    visitor_gen(Detail, Name, car_regis)
     return {"data" : "Success"}
 
 @route.get("/downloadOnce_gen_visitor/{Employee_ID}")
@@ -218,3 +232,33 @@ async def download_gen(Employee_ID: str):
         headers = {'Access-Control-Expose-Headers': 'Content-Disposition'}
         return FileResponse(file_path, filename=f"{Employee_ID}.png", headers=headers)
     return {'error': 'file not found'}
+
+@route.get('/agency')
+async def agency():
+    data = agency_select()
+    return data
+
+@route.get('/type_vehicle')
+async def type_vehicle():
+    data = type_vehicle_select()
+    return data
+
+@route.get('/zone')
+async def zone():
+    data = zone_select()
+    return data
+
+@route.get('/status_detail')
+async def status_detail():
+    data = status_detail_select()
+    return data
+
+@route.get('/company')
+async def company():
+    data = company_select()
+    return data
+
+@route.get('/company_dormitory')
+async def company_dormitory():
+    data = company_dormitory_select()
+    return data

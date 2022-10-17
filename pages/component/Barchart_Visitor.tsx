@@ -24,7 +24,6 @@ export default function Barchart_Visitor() {
   const [labels, setlabels] = useState();
   const [data_actual, setData_actual] = useState();
   const [data_all, setData_all] = useState();
-  // console.log(setData_actual.length);
 
   useEffect(() => { 
     (async () => {
@@ -34,7 +33,6 @@ export default function Barchart_Visitor() {
           setlabels(response.data[0])
           setData_actual(response.data[1])
           setData_all(response.data[2])
-          // console.log(response.data[2])
         });
     })();
    }, [])
@@ -47,7 +45,7 @@ export default function Barchart_Visitor() {
       },
       title: {
         display: true,
-        text: "Chart.js Bar Chart",
+        text: "Visitor and Passed",
       },
     },
   };

@@ -3,7 +3,6 @@ import Head from "next/head";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-import { MDBBtn } from 'mdb-react-ui-kit';
 
 export default function Register() {
   return (

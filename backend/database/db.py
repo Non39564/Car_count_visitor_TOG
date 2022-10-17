@@ -1,5 +1,4 @@
 import pymysql
-import os
 from datetime import datetime
 import pyqrcode
 import shutil
@@ -43,8 +42,11 @@ def insert_data(uid, date):
     sql = "INSERT INTO vechine_today(Date, Employee_ID) VALUES ('%s','%s')" % (
         date, uid)
     cursor = connection.cursor()
-    cursor.execute(sql)
-    connection.commit()
+    try:
+        cursor.execute(sql)
+        connection.commit()
+    except:
+        print('insert fail')
 
 
 def User_data(user):
@@ -87,8 +89,11 @@ def insert_visitor(id, date):
     connection = getConnection()
     sql = f"INSERT INTO visitor(Visitor, Date) VALUES ('{id}','{date}')"
     cursor = connection.cursor()
-    cursor.execute(sql)
-    connection.commit()
+    try:
+        cursor.execute(sql)
+        connection.commit()
+    except:
+        print('insert fail')
 
 def Visitor_data(detail):
     connection = getConnection()
@@ -146,8 +151,11 @@ def gen_qrcode(data):
         sql = "INSERT INTO receive_qrcode(Employee_ID) VALUES ('%s')" % (
             Employee_ID)
         cursor = connection.cursor()
-        cursor.execute(sql)
-        connection.commit()
+        try:
+            cursor.execute(sql)
+            connection.commit()
+        except:
+            print('insert fail')
         qr = pyqrcode.create(url+"/User/"+str(Employee_ID))
         filename = "./qrcode/"+str(Employee_ID)+".png"
         print(filename)
@@ -163,21 +171,21 @@ def table_Dashboard():
     WHERE data_user.Type_Vehicle = '1') as AllMoto,
     (SELECT COUNT(*) as Fullcar FROM data_user 
     JOIN type_vehicle ON type_vehicle.ID = data_user.Type_Vehicle 
-    WHERE data_user.Type_Vehicle = '2') as Allcar,
+    WHERE data_user.Type_Vehicle = '2' and data_user.Active ='A') as Allcar,
     b.actualcar, c.actualMoto
     FROM vechine_today
     JOIN
     (SELECT COUNT(*) as actualcar, Date asfff FROM vechine_today
     LEFT OUTER JOIN data_user ON data_user.Employee_ID = vechine_today.Employee_ID
     LEFT OUTER JOIN type_vehicle ON type_vehicle.ID = data_user.Type_Vehicle
-    WHERE data_user.Type_Vehicle = '2'
+    WHERE data_user.Type_Vehicle = '2' and data_user.Active ='A'
     GROUP BY vechine_today.Date) as b
     ON b.asfff = vechine_today.Date
     JOIN
     (SELECT COUNT(*) as actualMoto, Date asfff FROM vechine_today
     LEFT OUTER JOIN data_user ON data_user.Employee_ID = vechine_today.Employee_ID
     LEFT OUTER JOIN type_vehicle ON type_vehicle.ID = data_user.Type_Vehicle
-    WHERE data_user.Type_Vehicle = '1'
+    WHERE data_user.Type_Vehicle = '1' and data_user.Active ='A'
     GROUP BY vechine_today.Date) as c
     ON c.asfff = vechine_today.Date
     GROUP BY vechine_today.Date
@@ -275,9 +283,12 @@ def upload_user(data, data_user):
         sql = f"""INSERT INTO user(Employee_ID, Name, Phone, Agency, Company, Company_dormitory) VALUES 
         ('{Employee_ID}','{Name}','{Phone}','{Agency}','{Company}','{Company_dormitory}')"""
         print(sql)
-        cursor = connection.cursor()
-        cursor.execute(sql)
-        connection.commit()
+        try:
+            cursor = connection.cursor()
+            cursor.execute(sql)
+            connection.commit()
+        except:
+            print('insert fail')
     upload_data_user(data_user)
     return print('upload data_user success')
 
@@ -289,23 +300,29 @@ def upload_data_user(data_user):
         Car_Regitation = data_user['ทะเบียนรถ'][du]
         Zone = get_zone(data_user['ZONE'][du])
         connection = getConnection()
-        sql = "INSERT INTO data_user(Employee_ID, Type_Vehicle, Car_Regitation, Zone) VALUES ('%s','%s','%s','%s')" % (
-            Employee_ID, Type_Vehicle, Car_Regitation, Zone)
+        sql = "INSERT INTO data_user(Employee_ID, Type_Vehicle, Car_Regitation, Zone, Active_Status) VALUES ('%s','%s','%s','%s','%s')" % (
+            Employee_ID, Type_Vehicle, Car_Regitation, Zone,"A")
         cursor = connection.cursor()
-        cursor.execute(sql)
-        connection.commit()
+        try:
+            cursor.execute(sql)
+            connection.commit()
+        except:
+            print('insert fail')
 
 
-def insertdataonly(Employee_ID, Name, Phone, Agency, Company, Company_dormitory, Type_Vehicle, Car_Regitation, Zone):
+def insertdataonly(Employee_ID, Name, Phone, Agency, Company, Company_dormitory, Type_Vehicle, Car_Regitation, Zone,Status_type):
     connection = getConnection()
-    sql1 = f"""INSERT INTO data_user(Employee_ID, Type_Vehicle, Car_Regitation, Zone) VALUES 
-    ('{Employee_ID}','{Type_Vehicle}','{Car_Regitation}','{Zone}')"""
+    sql1 = f"""INSERT INTO data_user(Employee_ID, Type_Vehicle, Car_Regitation, Zone, Active_Status) VALUES 
+    ('{Employee_ID}','{Type_Vehicle}','{Car_Regitation}','{Zone}','{Status_type}')"""
     sql2 = f"""INSERT INTO user(Employee_ID, Name, Phone, Agency, Company, Company_dormitory) VALUES 
         ('{Employee_ID}','{Name}','{Phone}','{Agency}','{Company}','{Company_dormitory}')"""
     cursor = connection.cursor()
-    cursor.execute(sql2)
-    cursor.execute(sql1)
-    connection.commit()
+    try:
+        cursor.execute(sql2)
+        cursor.execute(sql1)
+        connection.commit()
+    except:
+        print('insert fail')
 
 
 def gen_qrcode_only(data):
@@ -313,8 +330,11 @@ def gen_qrcode_only(data):
     connection = getConnection()
     sql = "INSERT INTO receive_qrcode(Employee_ID) VALUES ('%s')" % (data)
     cursor = connection.cursor()
-    cursor.execute(sql)
-    connection.commit()
+    try:
+        cursor.execute(sql)
+        connection.commit()
+    except:
+        print('insert fail')
     qr = pyqrcode.create(url+"/User/"+str(data))
     filename = "./qrcodeonce/"+str(data)+".png"
     qr.png(filename, scale=6)
@@ -325,7 +345,7 @@ def find_edit(user):
     sql = f"""
     SELECT user.Employee_ID, user.Name, user.Phone, agency.Detail as Agency, company.Detail as company, 
     company_dormitory.Detail as company_dormitory, data_user.Car_Regitation as car_regis, type_vehicle.Detail as type_vehicle,
-    zone.Detail as Zone, receive_sticker.WhenDate as receive_sticker_Date, receive_sticker.Recipient as recipName, receive_sticker.ID as id
+    zone.Detail as Zone, receive_sticker.WhenDate as receive_sticker_Date, receive_sticker.Recipient as recipName, receive_sticker.ID as id, data_user.Active
     from user
     JOIN agency ON agency.ID = user.Agency
     JOIN company ON company.ID = user.Company
@@ -342,7 +362,7 @@ def find_edit(user):
     return data
 
 
-def update_user(Employee_ID, Name, Phone, Agency, Company_dormitory, Type_Vehicle, Car_Regitation, Zone):
+def update_user(Employee_ID, Name, Phone, Agency, Company_dormitory, Type_Vehicle, Car_Regitation, Zone,Status_type):
     connection = getConnection()
 
     Agency = get_agency(str(Agency))
@@ -354,20 +374,26 @@ def update_user(Employee_ID, Name, Phone, Agency, Company_dormitory, Type_Vehicl
     Company_dormitory='{Company_dormitory}' WHERE Employee_ID = '{Employee_ID}'
     """
     sql2 = f"""UPDATE data_user SET Type_Vehicle='{Type_Vehicle}', Car_Regitation='{Car_Regitation}', 
-    Zone='{Zone}' WHERE Employee_ID ='{Employee_ID}' and Type_Vehicle='{Type_Vehicle}'
+    Zone='{Zone}' , Active_Status ='{Status_type}' WHERE Employee_ID ='{Employee_ID}' and Type_Vehicle='{Type_Vehicle}'
     """
-    cursor = connection.cursor()
-    cursor.execute(sql1)
-    cursor.execute(sql2)
-    connection.commit()
+    try:
+        cursor = connection.cursor()
+        cursor.execute(sql1)
+        cursor.execute(sql2)
+        connection.commit()
+    except:
+        print('Update fail')
 
 
-def visitor_gen(Detail):
+def visitor_gen(Detail, Name, Car_regis):
     connection = getConnection()
-    sql1 = f"""INSERT INTO visitor_detail(Why) VALUES ('{Detail}')"""
+    sql1 = f"""INSERT INTO visitor_detail(Why, Name, Car_registration) VALUES ('{Detail}', '{Name}', '{Car_regis}')"""
     cursor = connection.cursor()
-    cursor.execute(sql1)
-    connection.commit()
+    try:
+        cursor.execute(sql1)
+        connection.commit()
+    except:
+        print('insert fail')
     url = "https://a41e-184-82-103-244.ap.ngrok.io"
     qr = pyqrcode.create(url+"/Visitor/"+str(Detail))
     filename = "./qrcodeonce/"+str(Detail)+".png"
@@ -429,3 +455,51 @@ def tablevisitor():
     cursor.execute(all)
     all = cursor.fetchall()
     return all
+
+def agency_select():
+    connection = getConnection()
+    sql = "SELECT * FROM agency"
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    return data
+
+def type_vehicle_select():
+    connection = getConnection()
+    sql = "SELECT * FROM type_vehicle"
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    return data
+
+def zone_select():
+    connection = getConnection()
+    sql = "SELECT * FROM zone"
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    return data
+
+def status_detail_select():
+    connection = getConnection()
+    sql = "SELECT * FROM status_detail"
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    return data
+
+def company_select():
+    connection = getConnection()
+    sql = "SELECT * FROM company"
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    return data
+
+def company_dormitory_select():
+    connection = getConnection()
+    sql = "SELECT * FROM company_dormitory"
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    return data

@@ -1,76 +1,88 @@
-import paginationFactory from 'react-bootstrap-table2-paginator';
-import BootstrapTable from "react-bootstrap-table-next";
-import ToolkitProvider, { Search, CSVExport } from "react-bootstrap-table2-toolkit";
 import { useState, useEffect } from 'react';
 import axios from "axios";
-import Col from 'react-bootstrap/Col';
-import Row from 'react-bootstrap/Row';
 import { MDBBtn } from 'mdb-react-ui-kit';
+import { useSession } from 'next-auth/react';
+import DataTable from 'react-data-table-component';
+import DataTableExtensions from "react-data-table-component-extensions";
 
 export default function EX() {
 
   const [datas, setData] = useState();
+  const { data: session } = useSession()
 
-  useEffect(() => { 
+  useEffect(() => {
     axios.get('http://127.0.0.1:8000/data_user')
-          .then(async (response) => {setData(response.data)})
-          .catch(error => console.log(error))
-   }, [])
+      .then(async (response) => { setData(response.data) })
+      .catch(error => console.log(error))
+  }, [])
 
-  const { SearchBar } = Search;
-  const { ExportCSVButton } = CSVExport;
   const columns = [
-    { dataField: "id", text: "No.Sticker", hidden: true,},
-    { dataField: "car_regis", text: "ทะเบียนรถ" },
-    { dataField: "", text: "บัตร ปชช." },
-    { dataField: "Employee_ID", text: "รหัสพนักงาน" },
-    { dataField: "Name", text: "ชื่อ-นามสกุล", },
-    { dataField: "Agency", text: "หน่วยงาน" },
-    { dataField: "Zone", text: "ZONE" },
-    { dataField: "type_vehicle", text: "ประเภทรถ" },
-    { dataField: "Phone", text: "เบอร์โทร" },
-    { dataField: "recipName", text: "ลงชื่อผู้รับ Sticker" },
-    { dataField: "receive_sticker_Date", text: "วันที่" },
-    { dataField: "company_dormitory", text: "อยู่หอพักบริษัท" },
+    { name: 'No.Sticker', selector: "id" },
+    { name: 'ทะเบียนรถ', selector: "car_regis" },
+    { name: 'บัตร ปชช.', selector: "actualcar" },
+    { name: 'รหัสพนักงาน', selector: "Employee_ID" },
+    { name: 'ชื่อ-นามสกุล', selector: "Name" },
+    { name: 'หน่วยงาน', selector: "Agency" },
+    { name: 'ZONE', selector: "Zone" },
+    { name: 'ประเภทรถ', selector: "type_vehicle" },
+    { name: 'เบอร์โทร', selector: "Phone" },
+    { name: 'ลงชื่อผู้รับ Sticker', selector: "recipName" },
+    { name: 'วันที่', selector: "receive_sticker_Date" },
+    { name: 'อยู่หอพักบริษัท', selector: "company_dormitory" }
   ];
 
 
   const data = datas || [];
-  console.log(data)
 
+  if (session) {
 
-  return (
-    <ToolkitProvider
-      keyField="id"
-      data={data}
-      columns={columns}
-      search
-      CSVExport
-    >
-      {(props) => (
-        <div>
-          <h3></h3>
-          <Row className="d-flex flex-row-reverse">
-            <Col md={3}>
-              <SearchBar {...props.searchProps} />
-            </Col>
-          </Row>
-          <hr />
-          <div className="d-flex justify-content-between">
-            <ExportCSVButton className='bg-success text-white' {...props.csvProps}>Export CSV!!</ExportCSVButton>
-            <MDBBtn  color='info' href="/addUser">Add</MDBBtn>
-          </div>
-          <hr />
-          <BootstrapTable
-            {...props.baseProps}
-            data={data}
+    return (
+      <div className="">
+        <MDBBtn color='info' href="/addUser">Add</MDBBtn>
+        <MDBBtn className='mx-2' color='success' href="/editUser">Edit</MDBBtn>
+        <br></br>
+        <div className="main">
+          <DataTableExtensions
             columns={columns}
-            noDataIndication="There is no data"
-            pagination={paginationFactory()}
-            headerClasses="bg-dark text-white text-center "
-          />
+            data={data}
+            print={false}
+            export={true}
+            exportHeaders={true}
+          >
+            <DataTable
+              // columns={columns}
+              // data={data}
+              noHeader
+              // defaultSortField="id"
+              // defaultSortAsc={false}
+              pagination
+              highlightOnHover
+            />
+          </DataTableExtensions>
         </div>
-      )}
-    </ToolkitProvider>
-  );
+      </div>
+    );
+
+  } else {
+    return (
+      <div className="main">
+        <DataTableExtensions
+          columns={columns}
+          data={data}
+          print={false}
+          export={false}
+        >
+          <DataTable
+            // columns={columns}
+            // data={data}
+            noHeader
+            // defaultSortField="id"
+            // defaultSortAsc={false}
+            pagination
+            highlightOnHover
+          />
+        </DataTableExtensions>
+      </div>
+    );
+  }
 }

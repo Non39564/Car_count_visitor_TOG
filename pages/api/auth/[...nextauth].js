@@ -13,9 +13,7 @@ function makeid(length) {
   return result+"=";
 }
 
-
 export const authOptions = {
-  
 
     providers: [
         CredentialsProvider({
@@ -37,7 +35,6 @@ export const authOptions = {
                       'Content-Type': 'application/json'
                     }
                   });
-                  console.log(res.data.status)
                 if (res.data.status == 'ok') {
                     return res.data.user
                 }
@@ -45,7 +42,8 @@ export const authOptions = {
             }
         })
     ],
-    secret: makeid(43),
+    // secret: makeid(43),
+    // secret: "xkm8NvccT7I467qFfq3rvwoy9Flq/UQtd0r0aYwAyGY=",
     callbacks: {
         async jwt({ token, user ,account }) {
           if (account) {

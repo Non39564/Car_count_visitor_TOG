@@ -46,7 +46,7 @@ export default function Barchart_Visitor() {
       },
       title: {
         display: true,
-        text: "Chart.js Bar Chart",
+        text: "All and Actual",
       },
     },
   };

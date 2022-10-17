@@ -6,18 +6,15 @@ import axios from "axios";
 import React, { Component } from "react";
 import { MDBProgress, MDBProgressBar } from 'mdb-react-ui-kit';
 import Row from 'react-bootstrap/Row';
-import Alert from 'react-bootstrap/Alert';
 import { useSession } from "next-auth/react"
 
 const withSession = (Component) => (props) => {
   const session = useSession()
 
-  // if the component has a render property, we are good
   if (Component.prototype.render) {
     return <Component session={session} {...props} />
   }
 
-  // if the passed component is a function component, there is no need for this wrapper
   throw new Error(
     [
       "You passed a function component, `withSession` is not needed.",
@@ -30,6 +27,7 @@ class uploadData extends Component {
   state = {
     file: null,
     uploadPercentage: 0,
+    UploadError:null,
   }
 
   handleFile(e) {
@@ -65,13 +63,18 @@ class uploadData extends Component {
           this.setState({ uploadPercentage: 100 })
         }, 1000)
       })
+    }).catch((error) => {
+      this.setState({ UploadError: error.response.status });
     });
   }
 
   render() {
     const { uploadPercentage } = this.state;
+    console.log(uploadPercentage)
     const { data: session, status } = this.props.session
-    // if (session) {
+    const { UploadError } = this.state
+
+    if (session) {
       return (
         <Container >
           <Row className="d-flex justify-content-around mb-4">
@@ -91,24 +94,38 @@ class uploadData extends Component {
                 <div className='col-4'>
                   <Form.Control className="mb-3" type="file" size="md" name="file" onChange={(e) => this.handleFile(e)} />
                 </div>
-                <div className='col-3'>
+                <div className='col-1'>
                   <Button variant="outline-success" type="button" onClick={(e) => this.handleUpload(e)}>Upload</Button>
                 </div>
-                <div className='col-3'>
-                  {uploadPercentage == 100 &&
-                    <Alert key="success" variant="success" className="text-center">
-                      Upload Complete
-                    </Alert>
+                {UploadError == 422 &&
+                  (
+                    <div className="text-danger col-2 pt-1">
+                      No file to upload
+                    </div>
+                  )
                   }
-                </div>
               </div>
             </Form.Group>
             <MDBProgress height='20'>
-              <MDBProgressBar striped animated variant="success" width={uploadPercentage} valuemin={0} valuemax={100}>
-                {uploadPercentage}%
+              <MDBProgressBar 
+              striped 
+              animated 
+              variant="success" 
+              width={uploadPercentage} 
+              valuemin={0} 
+              valuemax={100}>
+              {uploadPercentage}%
               </MDBProgressBar>
             </MDBProgress>
-            <br></br>
+            <div className='row mt-2 d-flex justify-content-center'>
+              <div className='col-3'>
+                  {uploadPercentage == 100 &&
+                    <h3 className="text-success">
+                      Upload Complete!
+                    </h3>
+                  }
+              </div>
+            </div>
             
           </Card>
         </Container>
@@ -116,7 +133,7 @@ class uploadData extends Component {
 
     }
   }
-//}
+}
 
 const uploadDataSession = withSession(uploadData)
 export default uploadDataSession

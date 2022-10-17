@@ -1,5 +1,3 @@
-import { useState } from 'react';
-import axios from "axios";
 import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
@@ -23,7 +21,6 @@ export const getStaticPaths = async () => {
     
 }
 
-
 export const getStaticProps = async (context) => {
     const detail = context.params.detail;
     const res = await fetch('http://localhost:8000/Visitor/'+detail);
@@ -33,8 +30,6 @@ export const getStaticProps = async (context) => {
         props: {visitor: data}
     }
 }
-
-
 
 const Detail_user = ({visitor}) => {
     const closeTab = () => {
@@ -52,8 +47,8 @@ const Detail_user = ({visitor}) => {
                     </Card.Header>
                     <Card.Body>
                         <div>
-                        <label  className="control-label d-inline-block text-right">
-                            รหัสพนักงาน: 
+                        <label className="control-label d-inline-block text-right">
+                            ชื่อ:
                         </label>&nbsp;&nbsp;
                         <span>
                             <input 
@@ -61,6 +56,32 @@ const Detail_user = ({visitor}) => {
                             className="px-0 bg-white border-0"
                             disabled 
                             value={visitor[0].Why}
+                            />
+                        </span>
+                        </div>
+                        <div>
+                        <label className="control-label d-inline-block text-right">
+                            ทะเบียนรถ:
+                        </label>&nbsp;&nbsp;
+                        <span>
+                            <input 
+                            type="text"
+                            className="px-0 bg-white border-0"
+                            disabled 
+                            value="กด 5889"
+                            />
+                        </span>
+                        </div>
+                        <div>
+                        <label className="control-label d-inline-block text-right">
+                            รายละเอียด:
+                        </label>&nbsp;&nbsp;
+                        <span>
+                            <input 
+                            type="text"
+                            className="px-0 bg-white border-0"
+                            disabled 
+                            value="something important"
                             />
                         </span>
                         </div>

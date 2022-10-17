@@ -1,5 +1,3 @@
-import { useState } from 'react';
-import axios from "axios";
 import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';

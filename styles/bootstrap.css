@@ -1,15 +1,13 @@
 /* Bootstrap Icon */
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css");
-/* DataTable */
-@import url("https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css");
 /* MDB */
 @import '~mdb-ui-kit/css/mdb.min.css';
-/* Bootstrap Table Paginator */
-@import '~react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
-/* Bootstrap Table Toolkit */
-@import '~react-bootstrap-table2-toolkit/dist/react-bootstrap-table2-toolkit.min.css';
+/* DataTable */
+@import 'react-data-table-component-extensions/dist/index.css';
+
 
 .form-control:focus {
     border-color: #00ff46;
     box-shadow: 0 0 10px rgba(0, 255, 64, 0.628);
   }
+  
