@@ -6,11 +6,8 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSession } from "next-auth/react"
 import Form from 'react-bootstrap/Form';
-import Swal from 'sweetalert2'
-import withReactContent from 'sweetalert2-react-content'
 
 export default function addUser() {
-    const MySwal = withReactContent(Swal)
     const { data: session, status } = useSession()
     const [Employee_ID, setEmployee_ID] = useState('');
     const [Name, setName] = useState('');
