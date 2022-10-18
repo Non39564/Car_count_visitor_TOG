@@ -65,15 +65,7 @@ export default function addUser() {
             "Zone": Zone_Select,
             "Status_type": Status_type_Select
         }).then(
-            MySwal.fire({
-                title: <p>Hello World</p>,
-                didOpen: () => {
-                  // `MySwal` is a subclass of `Swal` with all the same instance & static methods
-                  MySwal.showLoading()
-                },
-              }).then(() => {
-                return MySwal.fire(<p>Shorthand works too</p>)
-              })
+            window.location.reload(true)
         )
     }
 
